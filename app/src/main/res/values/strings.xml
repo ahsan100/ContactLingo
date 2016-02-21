@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">ContactLingoKeyboard</string>
+    <string name="hello_world">Hello World!</string>
+    <string name="action_settings">Settings</string>
+    <string name="ContactLingoKeyboard">ContactLingoKeyboard</string>
+    <string name="subtype_en_US">English (US)</string>
+    <string name="title_activity_manual">LINGO KEYBOARD MANUAL SETTINGS</string>
+    <string name="invite_phone_hint">Phone Number</string>
+    <string name="pick_email_label">CLICK TO SELECT CONTACT</string>
+</resources>

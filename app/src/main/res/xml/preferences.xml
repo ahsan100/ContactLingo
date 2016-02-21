@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="CONTACT LINGO KEYBOARD">
+        <Preference
+            android:key="choose_keyboard"
+            android:title="Change default keyboard"/>
+        <ListPreference
+            android:title="Keyboard Type"
+            android:summary="Select Keyboard Style"
+            android:key="keyboardType"
+            android:defaultValue="2"
+            android:entries="@array/KeyboardTypeArray"
+            android:entryValues="@array/KeyboardTypeAlias"/>
+    </PreferenceCategory>
+    <PreferenceCategory>
+        <ListPreference
+            android:title="Manually Set or Predict Language"
+            android:summary="Select Contact Lingo Feature"
+            android:key="choose_feature"
+            android:defaultValue="2"
+            android:entries="@array/KeyboardFeature"
+            android:entryValues="@array/keyboardFeatureAlias"/>
+    </PreferenceCategory>
+
+
+
+
+
+
+</PreferenceScreen>

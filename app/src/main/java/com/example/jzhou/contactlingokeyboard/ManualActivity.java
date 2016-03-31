@@ -149,6 +149,8 @@ public class ManualActivity extends AppCompatActivity {
             new_data.put(Provider.BasicData.SECOND_LANG, dropdown2.getSelectedItem().toString());
             getContentResolver().update(Provider.BasicData.CONTENT_URI, new_data, Provider.BasicData.CONTACT + "=?", new String[]{NUMBER});
         }
+        Toast.makeText(this, "LANGUAGE SAVED.", Toast.LENGTH_LONG).show();
+        this.finish();
     }
 
     public void addData(String NUMBER) {

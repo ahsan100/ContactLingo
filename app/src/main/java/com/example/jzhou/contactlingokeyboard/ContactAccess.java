@@ -54,6 +54,7 @@ public class ContactAccess extends AccessibilityService {
         if (PACKAGENAME != null) {
             switch (PACKAGENAME) {
                 case "com.android.mms":
+                    MyKeyboard.PACKAGE = "SMS";
                     if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED) {
                         newMessageFunction(text);
                     } else if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED) {
@@ -61,43 +62,45 @@ public class ContactAccess extends AccessibilityService {
                     }
                     break;
                 case "com.google.android.gm":
+                    MyKeyboard.PACKAGE = "EMAIL";
                     System.out.println("EMAIL");
                     if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
-                        if ((text.get(0).toString()).contains("<")) {
-                            int start = (text.get(0).toString()).indexOf("<") + 1;
-                            int end = (text.get(0).toString()).indexOf(">");
-                            String email = (text.get(0).toString()).substring(start, end);
-                            Log.d("CHECK", email);
-                            addEmail(email);
-                        }
+                        emailcheck(text);
                         //System.out.println("DEKHO" +(text.get(0).toString()).indexOf("<"));
                     }
                     break;
                 case "com.whatsapp":
+                    MyKeyboard.PACKAGE = "WHATSAPP";
                     System.out.println("WHATSAPP");
                     if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED){
-                        String NAME = null;
-                        if (text.size() != 0){
-                            NAME = text.get(0).toString();
-                            if(text.size() >= 3) {
-                                LASTMESSAGE = text.get(3).toString();
-                            }
-                            Log.d("CONTACT_LINGO :", NAME);
-                        }
-                        if (NAME == null){
-                        }
-                        else {
-                            NUMBER = getContactData(NAME);
-                            if (NUMBER != null) {
-                                System.out.println("INSIDE WHATSAPP" + NUMBER);
-                                //lingoFeature();
-                            } else System.out.println("NO SAVED CONTACT");
-                        }
+                        whatsappFunction(text);
                     }
                     break;
             }
         }
     }
+
+    public void emailcheck(List<CharSequence> text){
+        if ((text.get(0).toString()).contains("<")) {
+            int start = (text.get(0).toString()).indexOf("<") + 1;
+            int end = (text.get(0).toString()).indexOf(">");
+            String email = (text.get(0).toString()).substring(start, end);
+            Log.d("CHECK", email);
+            MyKeyboard.EMAIL = email;
+            if( ifSavedEmail(email)){
+
+            }
+            else{
+                addEmail(email);
+                Intent intent = new Intent(getApplicationContext(),PopUp.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("package", "EMAIL");
+                intent.putExtra("data", email);
+                startActivity(intent);
+            }
+        }
+    }
+
     // GET CONTACT INFORMATION FROM NEW CREATE MESSAGE
     public void newMessageFunction(List<CharSequence> text){
             if((text.toString().charAt(1) == '+' || text.toString().charAt(1) == '0')  && text.toString().length() >= 7) {
@@ -107,8 +110,10 @@ public class ContactAccess extends AccessibilityService {
                 lingoFeature();
             }
     }
+
     // GET CONTACT INFORMATION FROM ALRAEDY MESSAGE LIST
     public void messageFunction(List<CharSequence> allText) {
+
         String NAME = null;
         if (allText.size() != 0){
             NAME = allText.get(0).toString();
@@ -162,7 +167,7 @@ public class ContactAccess extends AccessibilityService {
         getContentResolver().insert(Provider.BasicData.CONTENT_URI, new_data);
     }
 
-    // CHECKS FOR CONTACT SAVED IN THE DATABASE
+    // CHECKS FOR CONTACT SAVED IN THE MESSAGE DATABASE
     public boolean ifSaved(String NUMBER){
         String[] projection = new String[]{ Provider.BasicData.CONTACT};
         Cursor cursor = getContentResolver().query(Provider.BasicData.CONTENT_URI, projection, null, null, null);
@@ -196,7 +201,8 @@ public class ContactAccess extends AccessibilityService {
             else {
                 Intent intent = new Intent(getApplicationContext(),PopUp.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("number", NUMBER);
+                intent.putExtra("package", "SMS");
+                intent.putExtra("data", NUMBER);
                 startActivity(intent);
                 //System.out.println("manual");
             }
@@ -264,6 +270,90 @@ public class ContactAccess extends AccessibilityService {
         new_data.put(Provider_Email.BasicData.FIRST_LANG, "ENGLISH");
         new_data.put(Provider_Email.BasicData.SECOND_LANG, "FINNISH");
         getContentResolver().insert(Provider_Email.BasicData.CONTENT_URI, new_data);
+    }
+
+    //GET CONTACT INFORMATION FROM ALRAEDY WHATSAPP LIST
+    public void whatsappFunction(List<CharSequence> allText){
+        String NAME = null;
+        if (allText.size() != 0){
+            NAME = allText.get(0).toString();
+            if(allText.size() >= 3) {
+                LASTMESSAGE = allText.get(3).toString();
+            }
+            Log.d("CONTACT_LINGO :", NAME);
+        }
+        if (NAME == null){
+        } else {
+            NUMBER = getContactData(NAME);
+            if (NUMBER != null) {
+                whatsappFeature();
+            } else System.out.println("NO SAVED CONTACT");
+        }
+    }
+
+    public void whatsappFeature(){
+        if ( ifSavedWhatsapp(NUMBER))
+        {
+            MyKeyboard.WHATSAPPNUMBER = NUMBER;
+            //Log.d("CONTACT_LINGO 1", NUMBER);
+            System.out.println("ALREADY EXIST");
+        }
+        else {
+            addwhatsapp(NUMBER);
+            languagePreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            if ((languagePreference.getString("choose_feature", "1")).equals("2")){
+                System.out.println("predictive" + LASTMESSAGE);
+                new langdetect().execute(LASTMESSAGE);
+            }
+            else {
+                Intent intent = new Intent(getApplicationContext(),PopUp.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("package", "WHATSAPP");
+                intent.putExtra("data", NUMBER);
+                startActivity(intent);
+                //System.out.println("manual");
+            }
+        }
+
+    }
+
+    public void addwhatsapp(String NUMBER){
+        ContentValues new_data = new ContentValues();
+        new_data.put(Provider_Whatsapp.BasicData.CONTACT, NUMBER);
+        new_data.put(Provider_Whatsapp.BasicData.FIRST_LANG, "ENGLISH");
+        new_data.put(Provider_Whatsapp.BasicData.SECOND_LANG, "FINNISH");
+        getContentResolver().insert(Provider_Whatsapp.BasicData.CONTENT_URI, new_data);
+    }
+
+    // CHECKS FOR CONTACT SAVED IN THE WHATSAPP DATABASE
+    public boolean ifSavedWhatsapp(String NUMBER){
+        String[] projection = new String[]{ Provider_Whatsapp.BasicData.CONTACT};
+        Cursor cursor = getContentResolver().query(Provider_Whatsapp.BasicData.CONTENT_URI, projection, null, null, null);
+        if (cursor.moveToFirst()) {
+            do {
+                String contact = cursor.getString(0);
+                if (NUMBER.equals(contact))
+                {
+                    return true;
+                }
+            } while (cursor.moveToNext());
+        }
+        return false;
+    }
+
+    public boolean ifSavedEmail(String EMAIL){
+        String[] projection = new String[]{ Provider_Email.BasicData.EMAIL};
+        Cursor cursor = getContentResolver().query(Provider_Email.BasicData.CONTENT_URI, projection, null, null, null);
+        if (cursor.moveToFirst()) {
+            do {
+                String contact = cursor.getString(0);
+                if (EMAIL.equals(contact))
+                {
+                    return true;
+                }
+            } while (cursor.moveToNext());
+        }
+        return false;
     }
 
     @Override

@@ -73,6 +73,12 @@
             android:exported="false"
             android:readPermission="com.example.jzhou.contactlingokeyboard.READ_CONTEXT_DATA"
             android:writePermission="com.example.jzhou.contactlingokeyboard.WRITE_CONTEXT_DATA"></provider>
+        <provider
+            android:name=".Provider_Whatsapp"
+            android:authorities="${applicationId}.provider.whatsapp"
+            android:exported="false"
+            android:readPermission="com.example.jzhou.contactlingokeyboard.READ_CONTEXT_DATA"
+            android:writePermission="com.example.jzhou.contactlingokeyboard.WRITE_CONTEXT_DATA"></provider>
 
 
         <provider

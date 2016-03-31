@@ -14,7 +14,7 @@ import android.widget.Toast;
  * Created by ahsanmanzoor on 19/02/2016.
  */
 public class PopUp extends Activity {
-    String[] items = new String[]{"ENGLISH", "FINNISH", "SWEDISH"};
+    String[] items = new String[]{"ENGLISH", "FINNISH", "SWEDISH", "DANISH", "NORWEGIAN"};
     Spinner dropdown;
     Spinner dropdown2;
     Intent intent;
@@ -39,11 +39,21 @@ public class PopUp extends Activity {
     }
 
     public void onClick(View view){
-        String NUMBER = intent.getStringExtra("number");
+        String DATA = intent.getStringExtra("data");
         ContentValues new_data = new ContentValues();
         new_data.put(Provider.BasicData.FIRST_LANG, dropdown.getSelectedItem().toString());
         new_data.put(Provider.BasicData.SECOND_LANG, dropdown2.getSelectedItem().toString());
-        getContentResolver().update(Provider.BasicData.CONTENT_URI, new_data, Provider.BasicData.CONTACT + "=?", new String[]{NUMBER});
+        switch (intent.getStringExtra("package")){
+            case "SMS":
+                getContentResolver().update(Provider.BasicData.CONTENT_URI, new_data, Provider.BasicData.CONTACT + "=?", new String[]{DATA});
+                break;
+            case "EMAIL":
+                getContentResolver().update(Provider_Email.BasicData.CONTENT_URI, new_data, Provider_Email.BasicData.EMAIL + "=?", new String[]{DATA});
+                break;
+            case "WHATSAPP":
+                getContentResolver().update(Provider_Whatsapp.BasicData.CONTENT_URI, new_data, Provider_Whatsapp.BasicData.CONTACT + "=?", new String[]{DATA});
+                break;
+        }
         Toast.makeText(this, "LANGUAGE SAVED.", Toast.LENGTH_LONG).show();
         this.finish();
 

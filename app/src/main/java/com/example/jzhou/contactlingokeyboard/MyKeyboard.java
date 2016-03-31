@@ -26,6 +26,16 @@ public class MyKeyboard extends InputMethodService implements KeyboardView.OnKey
     public Contacts contacts;
     public  double packagename;
     public  static String NUMBER;
+    public  static String EMAIL;
+    public  static String WHATSAPPNUMBER;
+    public  static String PACKAGE;
+    public static  String  SECONDLANG;
+    private Keyboard keyboardEng;
+    private Keyboard keyboardFin;
+    private Keyboard keyboardSwe;
+    private Keyboard keyboardNor;
+    private Keyboard keyboardDan;
+
 
     @Override
     public View onCreateInputView() {
@@ -39,23 +49,39 @@ public class MyKeyboard extends InputMethodService implements KeyboardView.OnKey
     public void onStartInputView(EditorInfo info, boolean restarting) {
 
         super.onStartInputView(info, restarting);
+        String language = "DEFAULT";
         keyboardtypePreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String keyboardPreference = keyboardtypePreference.getString("keyboardType", "2");
-        String language = this.getLanguage();
+        //System.out.println("CHECK SECOND" + PACKAGE);
+        switch (PACKAGE){
+            case "SMS":
+                language = this.getLanguage();
+                break;
+            case "EMAIL":
+                language = this.getEMAILLanguage();
+                break;
+            case "WHATSAPP":
+                language = this.getWhatappLanguage();
+                break;
+        }
         switch (language){
             case "ENGLISH":
-                System.out.println("MY KEYBOARD : " + language);
                 keyboardPreference = "8";
                 break;
             case "FINNISH":
-                System.out.println("MY KEYBOARD : " + language);
                 keyboardPreference = "5";
                 break;
             case "SWEDISH":
-                keyboardPreference = "7";
+                keyboardPreference = "9";
                 break;
             case "ARABIC":
                 keyboardPreference = "6";
+                break;
+            case "DANISH":
+                keyboardPreference = "4";
+                break;
+            case "NORWEGIAN":
+                keyboardPreference = "10";
                 break;
         }
 
@@ -74,10 +100,12 @@ public class MyKeyboard extends InputMethodService implements KeyboardView.OnKey
                 keyboard = new Keyboard(this, R.xml.danish);
                 symbolsKeyboard = new Keyboard(this, R.xml.symbols);
                 symbolsShift = new Keyboard(this, R.xml.symbols_shift);
+
                 break;
             case "5":
                 keyboard = new Keyboard(this, R.xml.finnish);
                 symbolsKeyboard = new Keyboard(this, R.xml.symbols);
+                symbolsShift = new Keyboard(this, R.xml.symbols_shift);
                 break;
             case "6":
                 keyboard = new Keyboard(this, R.xml.english_divide);
@@ -90,16 +118,24 @@ public class MyKeyboard extends InputMethodService implements KeyboardView.OnKey
             case "8":
                 keyboard = new Keyboard(this, R.xml.english);
                 symbolsKeyboard = new Keyboard(this, R.xml.symbols);
+                symbolsShift = new Keyboard(this, R.xml.symbols_shift);
                 break;
             case "9":
                 keyboard = new Keyboard(this, R.xml.swedish);
                 symbolsKeyboard = new Keyboard(this, R.xml.symbols);
+                symbolsShift = new Keyboard(this, R.xml.symbols_shift);
                 break;
             case "10":
                 keyboard = new Keyboard(this, R.xml.norwegian);
                 symbolsKeyboard = new Keyboard(this, R.xml.symbols);
+                symbolsShift = new Keyboard(this, R.xml.symbols_shift);
                 break;
         }
+        keyboardEng = new Keyboard(this, R.xml.english);
+        keyboardFin = new Keyboard(this, R.xml.finnish);
+        keyboardDan = new Keyboard(this, R.xml.danish);
+        keyboardNor = new Keyboard(this, R.xml.norwegian);
+        keyboardSwe = new Keyboard(this, R.xml.swedish);
         kv.setKeyboard(keyboard);
         kv.setPreviewEnabled(false);
         kv.closing();
@@ -109,17 +145,58 @@ public class MyKeyboard extends InputMethodService implements KeyboardView.OnKey
 
     }
 
+    public String getWhatappLanguage(){
+        if ( WHATSAPPNUMBER != null)
+        {
+            System.out.println("CONTACT LINGO 3 " + WHATSAPPNUMBER);
+            String[] projection = new String[]{ Provider_Whatsapp.BasicData.CONTACT, Provider_Whatsapp.BasicData.FIRST_LANG,Provider_Whatsapp.BasicData.SECOND_LANG};
+            Cursor cursor = getContentResolver().query(Provider_Whatsapp.BasicData.CONTENT_URI, projection, null, null, null);
+            if (cursor.moveToFirst()) {
+                do {
+                    String contact = cursor.getString(0);
+                    if (WHATSAPPNUMBER.equals(contact))
+                    {
+                        SECONDLANG = cursor.getString(2);
+                        return cursor.getString(1);
+                    }
+                } while (cursor.moveToNext());
+            }
+        }
+        return "DEFAULT";
+    }
+
+    public String getEMAILLanguage(){
+        if ( EMAIL != null)
+        {
+            System.out.println("CONTACT LINGO 3 " + EMAIL);
+            String[] projection = new String[]{ Provider_Email.BasicData.EMAIL, Provider_Email.BasicData.FIRST_LANG, Provider_Email.BasicData.SECOND_LANG};
+            Cursor cursor = getContentResolver().query(Provider_Email.BasicData.CONTENT_URI, projection, null, null, null);
+            if (cursor.moveToFirst()) {
+                do {
+                    String contact = cursor.getString(0);
+                    if (EMAIL.equals(contact))
+                    {
+                        SECONDLANG = cursor.getString(2);
+                        return cursor.getString(1);
+                    }
+                } while (cursor.moveToNext());
+            }
+        }
+        return "DEFAULT";
+    }
+
     public String getLanguage (){
         if ( NUMBER != null)
         {
         System.out.println("CONTACT LINGO 3 " + NUMBER);
-        String[] projection = new String[]{ Provider.BasicData.CONTACT, Provider.BasicData.FIRST_LANG};
+        String[] projection = new String[]{ Provider.BasicData.CONTACT, Provider.BasicData.FIRST_LANG, Provider.BasicData.SECOND_LANG};
         Cursor cursor = getContentResolver().query(Provider.BasicData.CONTENT_URI, projection, null, null, null);
         if (cursor.moveToFirst()) {
             do {
                 String contact = cursor.getString(0);
                 if (NUMBER.equals(contact))
                 {
+                    SECONDLANG = cursor.getString(2);
                     return cursor.getString(1);
                 }
             } while (cursor.moveToNext());
@@ -225,6 +302,7 @@ public class MyKeyboard extends InputMethodService implements KeyboardView.OnKey
                     kv.setPreviewEnabled(false);
                     kv.closing();
                 }
+                break;
             case 800:
                 changeview();
                 break;
@@ -241,6 +319,33 @@ public class MyKeyboard extends InputMethodService implements KeyboardView.OnKey
 
 
     public void changeview(){
+        switch (SECONDLANG){
+            case "ENGLISH":
+                kv.setKeyboard(keyboardEng);
+                kv.setPreviewEnabled(false);
+                kv.closing();
+                break;
+            case "SWEDISH":
+                kv.setKeyboard(keyboardSwe);
+                kv.setPreviewEnabled(false);
+                kv.closing();
+                break;
+            case "FINNISH":
+                kv.setKeyboard(keyboardFin);
+                kv.setPreviewEnabled(false);
+                kv.closing();
+                break;
+            case "DANISH":
+                kv.setKeyboard(keyboardDan);
+                kv.setPreviewEnabled(false);
+                kv.closing();
+                break;
+            case "NORWEGIAN":
+                kv.setKeyboard(keyboardNor);
+                kv.setPreviewEnabled(false);
+                kv.closing();
+                break;
+        }
 
     }
 

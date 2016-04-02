@@ -66,66 +66,47 @@ public class MyKeyboard extends InputMethodService implements KeyboardView.OnKey
         }
         switch (language){
             case "ENGLISH":
-                keyboardPreference = "8";
+                keyboardPreference = "3";
                 break;
             case "FINNISH":
-                keyboardPreference = "5";
+                keyboardPreference = "2";
                 break;
             case "SWEDISH":
-                keyboardPreference = "9";
-                break;
-            case "ARABIC":
-                keyboardPreference = "6";
-                break;
-            case "DANISH":
                 keyboardPreference = "4";
                 break;
+            case "DANISH":
+                keyboardPreference = "1";
+                break;
             case "NORWEGIAN":
-                keyboardPreference = "10";
+                keyboardPreference = "5";
+                break;
+            default:
+                keyboardPreference = "1";
                 break;
         }
 
         switch (keyboardPreference) {
             case "1":
-                keyboard = new Keyboard(this, R.xml.classic);
-                break;
-            case "2":
-                keyboard = new Keyboard(this, R.xml.crazy);
-                Log.d("keyboardtype", "crazy keyboard");
-                break;
-            case "3":
-                keyboard = new Keyboard(this, R.xml.converse);
-                break;
-            case "4":
                 keyboard = new Keyboard(this, R.xml.danish);
                 symbolsKeyboard = new Keyboard(this, R.xml.symbols);
                 symbolsShift = new Keyboard(this, R.xml.symbols_shift);
-
                 break;
-            case "5":
+            case "2":
                 keyboard = new Keyboard(this, R.xml.finnish);
                 symbolsKeyboard = new Keyboard(this, R.xml.symbols);
                 symbolsShift = new Keyboard(this, R.xml.symbols_shift);
                 break;
-            case "6":
-                keyboard = new Keyboard(this, R.xml.english_divide);
-                symbolsKeyboard = new Keyboard(this, R.xml.symbol_divide);
-                break;
-            case "7":
-                keyboard = new Keyboard(this, R.xml.multi);
-                symbolsKeyboard = new Keyboard(this, R.xml.symbol_multi);
-                break;
-            case "8":
+            case "3":
                 keyboard = new Keyboard(this, R.xml.english);
                 symbolsKeyboard = new Keyboard(this, R.xml.symbols);
                 symbolsShift = new Keyboard(this, R.xml.symbols_shift);
                 break;
-            case "9":
+            case "4":
                 keyboard = new Keyboard(this, R.xml.swedish);
                 symbolsKeyboard = new Keyboard(this, R.xml.symbols);
                 symbolsShift = new Keyboard(this, R.xml.symbols_shift);
                 break;
-            case "10":
+            case "5":
                 keyboard = new Keyboard(this, R.xml.norwegian);
                 symbolsKeyboard = new Keyboard(this, R.xml.symbols);
                 symbolsShift = new Keyboard(this, R.xml.symbols_shift);

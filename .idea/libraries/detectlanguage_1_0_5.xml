@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="detectlanguage-1.0.5">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.detectlanguage/detectlanguage/1.0.5/8d624a4611ed13c07202ef6e09ec3cd2de6e8b45/detectlanguage-1.0.5.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.detectlanguage/detectlanguage/1.0.5/5bac4aefbb6bbdd756dda5d213d6742c6a997a61/detectlanguage-1.0.5-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

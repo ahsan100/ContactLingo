@@ -1,16 +1,22 @@
 package com.example.jzhou.contactlingokeyboard;
 
+import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -38,6 +44,7 @@ public class ContactAccess extends AccessibilityService {
     private SharedPreferences languagePreference;
     private String LASTMESSAGE;
     public String PACKAGENAME;
+    public String CLASSNAME = "com.google.android.apps.messaging.ui.conversation.ConversationActivity";
 
 
     public ContactAccess() {
@@ -46,18 +53,31 @@ public class ContactAccess extends AccessibilityService {
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         languagePreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        //Log.d("CONTACT_LINGO", event.toString());
+        Log.d("CONTACT_LINGO", event.toString());
         if (event.getPackageName() != null) {
             PACKAGENAME = event.getPackageName().toString();
         }
         List<CharSequence> text = event.getText();
+        CharSequence check = event.getContentDescription();
+        CharSequence eventclass= event.getClassName();
         if (PACKAGENAME != null) {
             switch (PACKAGENAME) {
+                case "com.google.android.apps.messaging":
+                    MyKeyboard.PACKAGE = "SMS";
+                    if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED) {
+                        //Log.d("12CONTACT_LING", check.toString());
+                        //messageFunction(text);
+                    }
+                    else if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ) {
+                            Log.d("TEXT_INSIDE", text.toString());
+                    }
+                    break;
                 case "com.android.mms":
                     MyKeyboard.PACKAGE = "SMS";
                     if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED) {
                         newMessageFunction(text);
                     } else if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED) {
+                        Log.d("TEXT_INSIDE", text.toString());
                         messageFunction(text);
                     }
                     break;
@@ -71,7 +91,6 @@ public class ContactAccess extends AccessibilityService {
                     break;
                 case "com.whatsapp":
                     MyKeyboard.PACKAGE = "WHATSAPP";
-                    System.out.println("WHATSAPP");
                     if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED){
                         whatsappFunction(text);
                     }
@@ -113,12 +132,11 @@ public class ContactAccess extends AccessibilityService {
 
     // GET CONTACT INFORMATION FROM ALRAEDY MESSAGE LIST
     public void messageFunction(List<CharSequence> allText) {
-
         String NAME = null;
         if (allText.size() != 0){
             NAME = allText.get(0).toString();
             if(allText.size() >= 3) {
-                LASTMESSAGE = allText.get(3).toString();
+                //LASTMESSAGE = allText.get(3).toString();
             }
             Log.d("CONTACT_LINGO :", NAME);
         }
@@ -194,9 +212,9 @@ public class ContactAccess extends AccessibilityService {
         else {
             addData(NUMBER);
             languagePreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            if ((languagePreference.getString("choose_feature", "1")).equals("2")){
+            if ((languagePreference.getString("choose_feature", "1")).equals("2") && haveNetworkConnection()){
                 System.out.println("predictive" + LASTMESSAGE);
-                new langdetect().execute(LASTMESSAGE);
+                //new langdetect().execute(LASTMESSAGE);
             }
             else {
                 Intent intent = new Intent(getApplicationContext(),PopUp.class);
@@ -242,6 +260,23 @@ public class ContactAccess extends AccessibilityService {
             super.onPostExecute(aVoid);
             decodeLang();
         }
+    }
+
+    private boolean haveNetworkConnection() {
+        boolean haveConnectedWifi = false;
+        boolean haveConnectedMobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo ni : netInfo) {
+            if (ni.getTypeName().equalsIgnoreCase("WIFI"))
+                if (ni.isConnected())
+                    haveConnectedWifi = true;
+            if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
+                if (ni.isConnected())
+                    haveConnectedMobile = true;
+        }
+        return haveConnectedWifi || haveConnectedMobile;
     }
 
     public void decodeLang(){
@@ -301,9 +336,17 @@ public class ContactAccess extends AccessibilityService {
         else {
             addwhatsapp(NUMBER);
             languagePreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            if ((languagePreference.getString("choose_feature", "1")).equals("2")){
-                System.out.println("predictive" + LASTMESSAGE);
-                new langdetect().execute(LASTMESSAGE);
+            if ((languagePreference.getString("choose_feature", "1")).equals("2") && haveNetworkConnection()){
+                System.out.println(LASTMESSAGE);
+                String trim = LASTMESSAGE.trim();
+                if(trim.split("\\s+").length >= 4) {
+                    System.out.println("predictive" + LASTMESSAGE);
+                    new langdetect().execute(LASTMESSAGE);
+                }
+                else
+                {
+                    Toast.makeText(this, " LANGUAGE NOT DETECTED", Toast.LENGTH_LONG).show();
+                }
             }
             else {
                 Intent intent = new Intent(getApplicationContext(),PopUp.class);
